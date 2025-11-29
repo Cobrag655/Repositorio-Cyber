@@ -23,7 +23,7 @@ A ferramenta:
 1. Lê os argumentos passados pelo usuário usando `optparse`
 2. Busca o MAC permanente utilizando `ethtool -P`
 3. Usa comandos do sistema para desligar a interface, alterar o MAC e ligá‑la novamente
-4. Exibe o resultado final usando `ifconfig | grep ether`
+4. Exibe o resultado final usando re.search
 
 Tudo de forma direta, simples e funcional.
 
