@@ -74,7 +74,7 @@ python3 mac_changer.py --help
 BEM VINDO AO MAC ADRESS CHANGE!!
 [+] Mudando seu mac wlan0 para 00:11:22:33:44:55
 [+] RESULTADO!!
-    ether 00:11:22:33:44:55  txqueuelen 1000  (Ethernet)
+[+] Seu mac atual é: 00:11:22:33:44:55
 ```
 
 ---
