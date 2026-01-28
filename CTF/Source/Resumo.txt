@@ -1,0 +1,14 @@
+Vulnerabilidade explorada: Webmin password_change.cgi Backdoor
+CVE: CVE-2019-15107
+
+Durante a resolução do CTF Source, na plataforma TryHackMe, iniciei a enumeração com um scan agressivo utilizando Nmap, visando identificar todas as portas abertas e serviços ativos no alvo. O scan revelou a presença da porta 10000, com um serviço HTTP rodando, o que levantou suspeitas por ser uma porta não convencional para aplicações web.
+
+Ao acessar o serviço via navegador, foi identificado que não se tratava de uma aplicação web tradicional, mas sim do Webmin, um painel de administração remota. Tentativas de enumeração web não apresentaram resultados relevantes, o que levou à pesquisa por vulnerabilidades conhecidas associadas ao serviço.
+
+Durante essa etapa, identifiquei a vulnerabilidade CVE-2019-15107, um backdoor presente no endpoint password_change.cgi do Webmin, que permite execução remota de comandos sem autenticação em versões vulneráveis.
+
+Para a exploração, utilizei pela primeira vez a ferramenta Metasploit, configurando corretamente os parâmetros essenciais como RHOSTS, LHOST (interface tun0) e habilitando SSL = true. A exploração foi bem-sucedida, resultando em acesso remoto imediato com privilégios elevados (root).
+
+Após o acesso, foi possível localizar e extrair tanto a user.txt quanto a root.txt, finalizando o desafio.
+
+Essa experiência evidenciou de forma clara a força e eficiência do Metasploit, especialmente quando combinado com uma boa fase de enumeração e pesquisa de vulnerabilidades. Foi um marco importante no meu aprendizado em pentest e exploração de serviços reais.
