@@ -1,0 +1,19 @@
+TryHackMe: Billing - Writeup Completo
+
+Nivel: Facíl
+Objetivo: Boot2Root
+Ferramenta Principal: Metasploit
+
+Comecei o CTF "Billing" da TryHackMe com uma enumeração agressiva usando nmap -sC -min-rate 5000 -p- --open -vvv -n 10.10.x.x, que revelou as portas 22 (SSH), 80 (HTTP - MagnusBilling v3), 3306 (MariaDB), 5060 (Asterisk SIP). O site principal rodava MagnusBilling v3, uma versão vulnerável que já dava pistas do caminho.
+
+Fiz fuzzing com wfuzz -c -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -u http://10.10.x.x/FUZZ --hc 404, mas não encontrei diretórios úteis - /admin pedia login sem progressos. Suspeitando de SQLi no login, capturei uma request do Burp tentando executar senha e rodei sqlmap -r request.txt --batch. Porém, após poucas requests o Fail2ban baniu meu IP, bloqueando qualquer reconexão HTTP/SSH direta - mais tarde vi no fail2ban-client status que meu IP estava na lista negra dos logs Nginx.
+
+O reverse shell veio via MSFConsole explorando CVE-2023-30258: use exploit/linux/http/magnusbilling_cve_2023_30258, setei RHOSTS e LHOST, e ganhei shell como asterisk. A sessão reversa funcionou porque era inbound (alvo conectando em mim), ignorando o ban do Fail2ban. Criei um pseudo-terminal com python3 -c "import pty;pty.spawn('/bin/bash')" e o sudo -l revelou: (root) NOPASSWD: /usr/bin/fail2ban-client.
+
+A privesc foi o highlight: Fail2ban é uma ferramenta anti-brute-force que monitora logs e bane IPs. Com sudo sem senha no fail2ban-client, copiei as configs com rsync -av /etc/fail2ban/ /tmp/fail2ban/, criei um script malicioso em /tmp/script que gera /tmp/bash SUID root, uma action custom em action.d/custom-start-command.conf que roda esse script na fase actionstart, uma jail vazia [my-custom-jail] em jail.local apontando pra essa action, e um filter mínimo em filter.d/my-custom-jail.conf.
+
+O restart final sudo fail2ban-client -c /tmp/fail2ban/ -v restart executou tudo como root, criando o bash SUID. Rodei /tmp/bash -p, confirmei uid=0(root) e peguei /root/root.txt.
+
+Lições: Fail2ban protegeu contra SQLMap/Wfuzz mas virou arma com sudo mal configurado. Reverse shells sobrevivem bans. Tempo total ~1h.
+
+Base: 0xb0b.gitbook.io/writeups/tryhackme/2025/billing.
